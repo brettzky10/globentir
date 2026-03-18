@@ -1,3 +1,5 @@
+'use client'
+
 import dynamic from "next/dynamic";
 
 const AirspaceViewer = dynamic(() => import("@/components/global/AirspaceViewer"), {

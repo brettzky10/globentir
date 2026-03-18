@@ -18,7 +18,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { flights as ALL_FLIGHTS, type FlightData } from "@/lib/Data";
+import { flights as ALL_FLIGHTS, type FlightData } from "@/lib/globe/Data";
 import type { PollSnapshot, AircraftPosition } from "@/app/api/adsb-poll/route";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -289,10 +289,12 @@ interface Props {
   displayName: string;
   initialLat:  number | null;
   initialLng:  number | null;
+  /** When false (projection mode), all HUD overlays are hidden */
+  hudVisible?: boolean;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function AirspaceViewer({ displayName, initialLat, initialLng, citySlug }: Props) {
+export default function AirspaceViewer({ displayName, initialLat, initialLng, citySlug, hudVisible = true }: Props) {
   const router        = useRouter();
   const mapDivRef     = useRef<HTMLDivElement>(null);
   const canvasRef     = useRef<HTMLCanvasElement>(null);
@@ -877,7 +879,8 @@ export default function AirspaceViewer({ displayName, initialLat, initialLng, ci
       )}
 
       {/* ── TOP BAR ────────────────────────────────────────────────────── */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 20, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 18px", background: "linear-gradient(to bottom,rgba(0,0,0,0.92),transparent)", borderBottom: "1px solid rgba(0,229,255,0.05)" }}>
+      {hudVisible && (
+      <div data-hud style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 20, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 18px", background: "linear-gradient(to bottom,rgba(0,0,0,0.92),transparent)", borderBottom: "1px solid rgba(0,229,255,0.05)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button onClick={() => router.back()}
             onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,229,255,0.15)")}
@@ -907,9 +910,11 @@ export default function AirspaceViewer({ displayName, initialLat, initialLng, ci
           )}
         </div>
       </div>
+      )}
 
       {/* ── DATA SOURCE TOGGLE (top centre) ──────────────────────────── */}
-      <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", zIndex: 25, display: "flex", borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(16px)" }}>
+      {hudVisible && (
+      <div data-hud style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", zIndex: 25, display: "flex", borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(16px)" }}>
         {(["sim", "live"] as DataSource[]).map(s => (
           <button key={s} onClick={() => setSource(s)}
             style={{
@@ -923,9 +928,11 @@ export default function AirspaceViewer({ displayName, initialLat, initialLng, ci
           </button>
         ))}
       </div>
+      )}
 
       {/* ── VIEW CONTROLS (bottom centre) ─────────────────────────────── */}
-      <div style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 20, minWidth: 320 }}>
+      {hudVisible && (
+      <div data-hud style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 20, minWidth: 320 }}>
         <div style={{ padding: "14px 20px", background: "rgba(0,0,0,0.85)", border: "1px solid rgba(0,229,255,0.18)", borderRadius: 18, backdropFilter: "blur(20px)", display: "flex", flexDirection: "column", gap: 14 }}>
 
           {/* Radius */}
@@ -989,9 +996,11 @@ export default function AirspaceViewer({ displayName, initialLat, initialLng, ci
 
         </div>
       </div>
+      )}
 
       {/* ── LAYER TOGGLES (left) ─────────────────────────────────────── */}
-      <div style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", zIndex: 20, display: "flex", flexDirection: "column", gap: 5 }}>
+      {hudVisible && (
+      <div data-hud style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", zIndex: 20, display: "flex", flexDirection: "column", gap: 5 }}>
         <div style={{ fontSize: 9, color: "rgba(0,229,255,0.35)", letterSpacing: "0.18em", padding: "3px 8px", textTransform: "uppercase" }}>LAYERS</div>
         {(Object.keys(layers) as Array<keyof LayerState>).map(key => {
           const m  = LAYER_META[key];
@@ -1015,9 +1024,11 @@ export default function AirspaceViewer({ displayName, initialLat, initialLng, ci
           );
         })}
       </div>
+      )}
 
       {/* ── ALTITUDE LEGEND ──────────────────────────────────────────── */}
-      <div style={{ position: "absolute", bottom: 28, right: 14, zIndex: 20 }}>
+      {hudVisible && (
+      <div data-hud style={{ position: "absolute", bottom: 28, right: 14, zIndex: 20 }}>
         <div style={{ padding: "11px 13px", background: "rgba(0,0,0,0.85)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, backdropFilter: "blur(16px)" }}>
           <div style={{ fontSize: 9, color: "rgba(255,255,255,0.22)", letterSpacing: "0.18em", marginBottom: 7, textTransform: "uppercase" }}>ALTITUDE</div>
           {ALT_LEGEND.map(({ label, color }) => (
@@ -1028,9 +1039,10 @@ export default function AirspaceViewer({ displayName, initialLat, initialLng, ci
           ))}
         </div>
       </div>
+      )}
 
       {/* ── SELECTED SIM CARD ─────────────────────────────────────────── */}
-      {selSim && (
+      {hudVisible && selSim && (
         <InfoCard title={selSim.id.toUpperCase()} badge="SIM" badgeColor="100,160,255"
           onClose={() => { setSelSim(null); selRef.current = null; }}
           rows={[
@@ -1047,7 +1059,7 @@ export default function AirspaceViewer({ displayName, initialLat, initialLng, ci
       )}
 
       {/* ── SELECTED DRONE CARD ───────────────────────────────────────── */}
-      {selDrone && (
+      {hudVisible && selDrone && (
         <InfoCard title={selDrone.id.toUpperCase()} badge="DRONE" badgeColor="255,80,200"
           onClose={() => { setSelDrone(null); selRef.current = null; }}
           rows={[
@@ -1063,7 +1075,7 @@ export default function AirspaceViewer({ displayName, initialLat, initialLng, ci
       )}
 
       {/* ── SELECTED LIVE CARD ────────────────────────────────────────── */}
-      {selAc && !selSim && !selDrone && (
+      {hudVisible && selAc && !selSim && !selDrone && (
         <InfoCard title={selAc.callsign || selAc.hex} badge="LIVE" badgeColor="105,240,174"
           onClose={() => { setSelAc(null); selRef.current = null; }}
           rows={[

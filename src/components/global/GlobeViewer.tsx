@@ -4,22 +4,22 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Earth } from "@/lib/Earth";
-import { Flight } from "@/lib/Flight";
-import { InstancedPlanes } from "@/lib/InstancedPlanes";
-import { ParticlePlanes } from "@/lib/ParticlePlanes";
-import { MergedFlightPaths } from "@/lib/MergedFlightPaths";
-import { Stars } from "@/lib/Stars";
-import { InterferenceZones, CANADA_INTERFERENCE_ZONES } from "@/lib/InterferenceZones";
-import type { InterferenceZone } from "@/lib/InterferenceZones";
-import { ADSBManager } from "@/lib/ADSBManager";
-import type { ADSBSnapshot } from "@/lib/ADSBManager";
+import { Earth } from "@/lib/globe/Earth";
+import { Flight } from "@/lib/globe/Flight";
+import { InstancedPlanes } from "@/lib/globe/InstancedPlanes";
+import { ParticlePlanes } from "@/lib/globe/ParticlePlanes";
+import { MergedFlightPaths } from "@/lib/globe/MergedFlightPaths";
+import { Stars } from "@/lib/globe/Stars";
+import { InterferenceZones, CANADA_INTERFERENCE_ZONES } from "@/lib/globe/InterferenceZones";
+import type { InterferenceZone } from "@/lib/globe/InterferenceZones";
+import { ADSBManager } from "@/lib/globe/ADSBManager";
+import type { ADSBSnapshot } from "@/lib/globe/ADSBManager";
 import type { ADSBaircraft } from "@/app/api/adsb/route";
-import { CountryGlobe, COUNTRY_CENTROIDS } from "@/lib/CountryGlobe";
-import type { CountryInfo } from "@/lib/CountryGlobe";
-import { CityLabels } from "@/lib/CityLabels";
-import { getCitiesForCountry } from "@/lib/cities";
-import { buildAirspaceUrl } from "@/lib/cityNav";
+import { CountryGlobe, COUNTRY_CENTROIDS } from "@/lib/globe/CountryGlobe";
+import type { CountryInfo } from "@/lib/globe/CountryGlobe";
+import { CityLabels } from "@/lib/globe/CityLabels";
+import { getCitiesForCountry } from "@/lib/globe/cities";
+import { buildAirspaceUrl } from "@/lib/globe/cityNav";
 import {
   getSunVector3,
   getCurrentUtcTimeHours,
@@ -27,8 +27,8 @@ import {
   animateCameraToPosition,
   latLngToVector3,
   vector3ToLatLng,
-} from "@/lib/Utils";
-import { flights as flightData } from "@/lib/Data";
+} from "@/lib/globe/Utils";
+import { flights as flightData } from "@/lib/globe/Data";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
