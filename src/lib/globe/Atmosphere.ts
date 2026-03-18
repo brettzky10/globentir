@@ -1,0 +1,51 @@
+import * as THREE from "three";
+
+export class Atmosphere {
+  private earthRadius: number;
+  public mesh: THREE.Mesh | null = null;
+  private material: THREE.ShaderMaterial | null = null;
+
+  constructor(earthRadius = 3000) {
+    this.earthRadius = earthRadius;
+    this.createAtmosphere();
+  }
+
+  private createAtmosphere(): void {
+    const atmosphereGeometry = new THREE.SphereGeometry(this.earthRadius * 1.25, 64, 32);
+    this.material = new THREE.ShaderMaterial({
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vPosition = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          float intensity = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+          gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
+        }
+      `,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      transparent: true,
+      depthWrite: false,
+    });
+
+    this.mesh = new THREE.Mesh(atmosphereGeometry, this.material);
+    this.mesh.rotation.y = -Math.PI / 2;
+  }
+
+  addToScene(scene: THREE.Scene): void {
+    if (this.mesh) scene.add(this.mesh);
+  }
+
+  dispose(): void {
+    this.mesh?.geometry.dispose();
+    this.material?.dispose();
+  }
+}
